@@ -1,12 +1,20 @@
 import axios from 'axios';
 import { Formik } from 'formik';
 import { Alert, Button, Col, Row } from 'react-bootstrap';
+import { useNavigate } from "react-router-dom";
 import { useAuth } from 'store/authContext';
 import * as Yup from 'yup';
 
 const JWTLogin = () => {
-
   const { login } = useAuth();
+  const navigate = useNavigate();
+
+  if (localStorage.getItem('token')) {
+    console.log('Token exists');
+    login(localStorage.getItem('token'));
+    navigate('/demos/admin-templates/datta-able/react/free/dashboard');
+  }
+
   return (
     <Formik
       initialValues={{
@@ -32,8 +40,9 @@ const JWTLogin = () => {
           if (response.status === 200) {
             const data = await response.data;
             await login(data.token);
-            // window.location.href = '/demos/admin-templates/datta-able/react/free/dashboard';
+            localStorage.setItem('token', data.token);
             setStatus({ success: true });
+            navigate('/demos/admin-templates/datta-able/react/free/dashboard');
             // Store the token or handle successful login
           } else {
             setErrors({ submit: 'Invalid username or password' });
