@@ -12,7 +12,7 @@ const JWTLogin = () => {
   if (localStorage.getItem('token')) {
     console.log('Token exists');
     login(localStorage.getItem('token'));
-    navigate('/demos/admin-templates/datta-able/react/free/dashboard');
+    navigate(-1);
   }
 
   return (
@@ -28,7 +28,7 @@ const JWTLogin = () => {
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
-          const response = await axios.post('http://192.168.50.12:8000/api/auth-token/', {
+          const response = await axios.post('http://MiniOne.local:8000/api/auth-token/', {
             username: values.username,
             password: values.password
           }, {
@@ -42,7 +42,7 @@ const JWTLogin = () => {
             await login(data.token);
             localStorage.setItem('token', data.token);
             setStatus({ success: true });
-            navigate('/demos/admin-templates/datta-able/react/free/dashboard');
+            navigate(-1);
             // Store the token or handle successful login
           } else {
             setErrors({ submit: 'Invalid username or password' });

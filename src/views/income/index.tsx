@@ -1,35 +1,21 @@
 import axios from 'axios';
+import { SalaryType } from 'models/salary';
 import React, { useEffect, useState } from 'react';
-import { useAuth } from 'store/authContext';
-
+import { Card, Col, Row, Tab, Table, Tabs } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
-import { Salary } from 'models/salary';
-import { Card, Col, Row, Table } from 'react-bootstrap';
-
-interface SalaryDetailItem {
-  id: number;
-  name: string;
-};
+import { useAuth } from 'store/authContext';
+import BarDiscreteChart from './BarDiscreteChart';
 
 const IncomeDefault = () => {
-  const [salaryDetailItem, setSalaryDetailItem] = useState<SalaryDetailItem[]>([]);
-  const [salary, setSalary] = useState<Salary[]>([]);
+  const [salary, setSalary] = useState<SalaryType[]>([]);
   const { isAuthenticated, getToken } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = getToken();
-    if (!isAuthenticated) navigate('/demos/admin-templates/datta-able/react/free/login');;
+    if (!isAuthenticated) navigate('/demos/admin-templates/datta-able/react/free/login');
 
-    axios.get('http://192.168.50.12:8000/api/salarydetailitem/', { headers: { Authorization: `Token ${token}` } })
-      .then(response => {
-        setSalaryDetailItem(response.data);
-      })
-      .catch(error => {
-        console.error('There was an error fetching the data!', error);
-      });
-
-    axios.get('http://192.168.50.12:8000/api/salary/', { headers: { Authorization: `Token ${token}` } })
+    axios.get('http://minione.local:8000/api/salary/', { headers: { Authorization: `Token ${token}` } })
       .then(response => {
         setSalary(response.data);
       })
@@ -38,64 +24,79 @@ const IncomeDefault = () => {
       });
   }, [isAuthenticated]);
 
+  const dataAscending = salary.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const years = Array.from(new Set(salary.map(item => new Date(item.date).getFullYear()))).sort((a, b) => b - a);
+
   return (
     <>
       <Row>
-        <Col xl={6} xxl={4}>
+        <Col xl={12} xxl={12}>
+          <Tabs defaultActiveKey="all">
+            <Tab eventKey="all" title="ALL">
+              <BarDiscreteChart salaries={dataAscending} />
+            </Tab>
+            {years.map((year, index) => {
+              const data = salary.filter(item => new Date(item.date).getFullYear() === year);
+              return (
+                <Tab key={index} eventKey={year.toString()} title={year.toString()}>
+                  <BarDiscreteChart salaries={data} />
+                </Tab>
+              );
+            })}
+          </Tabs>
+        </Col>
+      </Row>
+      <Row className="mt-4">
+        <Col xl={12} xxl={12}>
           <Card>
             <Card.Header>
-              <Card.Title as="h5">Basic Table</Card.Title>
-              <span className="d-block m-t-5">
-                use bootstrap <code>Table</code> component
-              </span>
+              <Card.Title as="h5">Pay List</Card.Title>
+              <div className="d-flex justify-content-between align-items-center">
+                <span className="d-block m-t-5">
+                  Click each item to view more details.
+                </span>
+              </div>
             </Card.Header>
-            <Card.Body>
-              <Table responsive>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Date</th>
-                    <th>Net Pay</th>
-                    <th>Gross Pay</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {salary.map((data, index) => {
-                    return (
-                      <tr key={index}>
-                        <td>{data.id}</td>
-                        <td>{data.date}</td>
-                        <td>{data.net_pay}</td>
-                        <td>{data.gross_pay.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                      </tr>
-                    );
-                  })}
-
-                </tbody>
-              </Table>
-            </Card.Body>
           </Card>
         </Col>
-
-        {salaryDetailItem.map((data, index) => {
-          return (
-            <Col key={index} xl={6} xxl={4}>
-              <Card>
-                <Card.Body>
-                  <h6 className="mb-4">{data.name}</h6>
-                  <div className="row d-flex align-items-center">
-                    <div className="col-9">
-                      <h3 className="f-w-300 d-flex align-items-center m-b-0">
-                        {data.name}
-                      </h3>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          );
-        })}
       </Row>
+      {years.length > 0 && (
+        <Row>
+          <Col xl={12} xxl={12}>
+            <Tabs defaultActiveKey={years[0].toString()}>
+              {years.map((year, index) => {
+                const data = salary.filter(item => new Date(item.date).getFullYear() === year);
+                return (
+                  <Tab key={index} eventKey={year.toString()} title={year.toString()}>
+                    <Table responsive hover>
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Date</th>
+                          <th>Net Pay</th>
+                          <th>Gross Pay</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.map((data, index) => {
+                          return (
+                            <tr key={index} onClick={() => navigate(`/app/income/salary/${data.id}`)} style={{ cursor: 'pointer' }}>
+                              <td>{data.id}</td>
+                              <td>{data.date}</td>
+                              <td>{data.net_pay}</td>
+                              <td>{data.gross_pay.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </Table>
+                  </Tab>
+                );
+              })}
+            </Tabs>
+          </Col>
+        </Row>
+      )}
     </>
   );
 };

@@ -1,9 +1,10 @@
 import React from 'react';
-import { ListGroup, Dropdown } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Dropdown, ListGroup } from 'react-bootstrap';
+import { Link, useLocation } from 'react-router-dom';
 
 import useWindowSize from '../../../../hooks/useWindowSize';
 import NavSearch from './NavSearch';
+import { is } from 'immutable';
 
 const NavLeft = () => {
   const windowSize = useWindowSize();
@@ -12,6 +13,10 @@ const NavLeft = () => {
   if (windowSize.width <= 575) {
     navItemClass = [...navItemClass, 'd-none'];
   }
+
+  const location = useLocation();
+  console.log(location.pathname);
+  const isSalaryDetailPage = location.pathname === '/app/income/default';
 
   return (
     <React.Fragment>
@@ -23,21 +28,20 @@ const NavLeft = () => {
             </Dropdown.Toggle>
             <ul>
               <Dropdown.Menu>
-                <li>
-                  <Link to="#" className="dropdown-item">
-                    Action
-                  </Link>
-                </li>
-                <li>
-                  <Link to="#" className="dropdown-item">
-                    Another action
-                  </Link>
-                </li>
-                <li>
-                  <Link to="#" className="dropdown-item">
-                    Something else here
-                  </Link>
-                </li>
+                {isSalaryDetailPage && (
+                  <li>
+                    <Link to="/app/income/salary/add" className="dropdown-item">
+                      Add new salary
+                    </Link>
+                  </li>
+                )}
+                {!isSalaryDetailPage && (
+                  <li>
+                    <Link to="#" className="dropdown-item">
+                      Action
+                    </Link>
+                  </li>
+                )}
               </Dropdown.Menu>
             </ul>
           </Dropdown>

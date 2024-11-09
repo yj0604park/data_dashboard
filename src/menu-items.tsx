@@ -1,4 +1,26 @@
-const menuItems = {
+type MenuItem = {
+  id: string;
+  title: string;
+  type: 'group' | 'item' | 'collapse';
+  icon?: string;
+  url?: string;
+  style?: React.CSSProperties;
+  badge?: {
+    title: string;
+    type: string;
+  };
+  target?: boolean;
+  breadcrumbs?: boolean;
+  classes?: string;
+  external?: boolean;
+  children?: MenuItem[];
+};
+
+type MenuItems = {
+  items: MenuItem[];
+};
+
+const menuItems: MenuItems = {
   items: [
     {
       id: 'navigation',
@@ -18,7 +40,8 @@ const menuItems = {
           title: 'Income',
           type: 'item',
           icon: 'fa fa-dollar-sign',
-          url: '/app/income/default'
+          url: '/app/income/default',
+          style: { marginLeft: '10px' }
         }
       ]
     },

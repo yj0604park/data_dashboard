@@ -62,6 +62,16 @@ const routes = [
       },
       {
         exact: 'true',
+        path: '/app/income/salary/:salary_id',
+        element: lazy(() => import('./views/income/SalaryDetail'))
+      },
+      {
+        exact: 'true',
+        path: '/app/income/salary/add',
+        element: lazy(() => import('./views/income/SalaryAdd'))
+      },
+      {
+        exact: 'true',
         path: '/basic/button',
         element: lazy(() => import('./views/ui-elements/basic/BasicButton'))
       },
